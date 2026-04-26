@@ -18,6 +18,7 @@ const ProfilePage = () => {
     height: '',
     menstruation_age: '',
     cycle_length: '',
+    last_period_date: '',
     symptoms: '',
     goals: ''
   });
@@ -33,9 +34,11 @@ const ProfilePage = () => {
         height: profile.height?.toString() || '',
         menstruation_age: profile.menstruation_age?.toString() || '',
         cycle_length: profile.cycle_length || '',
+        last_period_date: (profile as any).last_period_date || '',
         symptoms: profile.symptoms || '',
         goals: profile.goals || ''
       });
+      setViewMode(true);
     }
   }, [profile]);
 
@@ -66,10 +69,11 @@ const ProfilePage = () => {
         height: formData.height ? parseFloat(formData.height) : undefined,
         menstruation_age: formData.menstruation_age ? parseInt(formData.menstruation_age) : undefined,
         cycle_length: formData.cycle_length || undefined,
+        last_period_date: formData.last_period_date || undefined,
         symptoms: formData.symptoms || undefined,
         goals: formData.goals || undefined,
         pcos_risk_score: riskScore
-      });
+      } as any);
 
       setViewMode(true);
     } finally {
@@ -96,10 +100,10 @@ const ProfilePage = () => {
     return (
       <div className="space-y-6 pb-20">
         <div className="text-center">
-          <div className="w-24 h-24 gradient-rose rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-            <User className="w-12 h-12 text-white" />
+          <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-xl border border-white/20">
+            <User className="w-10 h-10 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-gradient">Profile Summary</h2>
+          <h2 className="text-3xl font-black text-slate-800 tracking-tighter">Profile Summary</h2>
           <p className="text-gray-600 mt-2">Here is your saved profile</p>
         </div>
 
@@ -110,6 +114,37 @@ const ProfilePage = () => {
           <p><strong>Height:</strong> {formData.height} cm</p>
           <p><strong>Menstruation Age:</strong> {formData.menstruation_age}</p>
           <p><strong>Cycle Length:</strong> {formData.cycle_length}</p>
+          <p><strong>Last Period:</strong> {formData.last_period_date || 'Not set'}</p>
+          <p className="p-3 bg-purple-50 rounded-xl border border-purple-100 mt-2">
+             <strong className="text-purple-700">Current Phase:</strong> 
+             <span className="ml-2 font-bold text-purple-600">
+               {(() => {
+                 if (!formData.last_period_date) return 'Unknown';
+                 const lastDate = new Date(formData.last_period_date);
+                 const diffDays = Math.floor((new Date().getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+                 const cycle = parseInt(formData.cycle_length.split('-')[1]) || 28;
+                 
+                 if (diffDays < 6) return 'Menstruation (Day ' + (diffDays + 1) + ')';
+                 if (diffDays < 14) return 'Follicular Phase';
+                 if (diffDays < 17) return 'Ovulation Window';
+                 if (diffDays < cycle) return 'Luteal Phase';
+                 return 'Cycle Overdue (Check Health)';
+               })()}
+             </span>
+          </p>
+          <p className="p-3 bg-pink-50 rounded-xl border border-pink-100 mt-2">
+             <strong className="text-pink-700">Next Predicted Period:</strong> 
+             <span className="ml-2 font-bold text-pink-600">
+               {(() => {
+                 if (!formData.last_period_date) return 'Unknown';
+                 const lastDate = new Date(formData.last_period_date);
+                 const cycle = parseInt(formData.cycle_length.split('-')[1]) || 28;
+                 const nextDate = new Date(lastDate);
+                 nextDate.setDate(lastDate.getDate() + cycle);
+                 return nextDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+               })()}
+             </span>
+          </p>
           <p><strong>Symptoms:</strong> {formData.symptoms}</p>
           <p><strong>Goals:</strong> {formData.goals}</p>
           <p><strong>PCOS Risk Score:</strong> {
@@ -132,33 +167,18 @@ const ProfilePage = () => {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-6 pb-20">
-        <div className="animate-pulse">
-          <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4"></div>
-          <div className="h-6 bg-gray-200 rounded mx-auto w-48 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded mx-auto w-64 mb-6"></div>
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-32 bg-gray-200 rounded-xl mb-4"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="text-center">
-        <div className="w-24 h-24 gradient-rose rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+        <div className="w-20 h-20 bg-white rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-xl border border-purple-50 p-2.5">
           <img 
-                  src="/images/favicon.png" 
+                  src="/images/logo.png" 
                   alt="GYNORA Logo" 
-                  className="w-24 h-24 rounded-lg"
+                  className="w-full h-full object-contain"
                 />
         </div>
-        <h2 className="text-3xl font-bold text-gradient">Your Profile</h2>
+        <h2 className="text-3xl font-black text-slate-800 tracking-tighter">Your Profile</h2>
         <p className="text-gray-600 mt-2">Help us personalize your wellness journey</p>
       </div>
 
@@ -246,6 +266,16 @@ const ProfilePage = () => {
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label htmlFor="last_period" className="text-sm font-medium text-gray-700">First day of last period</Label>
+            <Input
+              id="last_period"
+              type="date"
+              value={formData.last_period_date}
+              onChange={(e) => handleInputChange('last_period_date', e.target.value)}
+              className="mt-1"
+            />
+          </div>
         </div>
       </Card>
 
@@ -295,7 +325,7 @@ const ProfilePage = () => {
 
       {formData.weight && formData.height && (
   <div className="text-center text-sm text-gray-600 mt-4">
-    Estimated PCOS Risk Score: <strong>
+    Baseline Profile Risk: <strong>
   {
     (() => {
       let score = 0;

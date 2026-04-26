@@ -1,93 +1,176 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Feminine wellness app color palette and gradients */
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Vibrant Gynora Wellness Palette */
+    --background: 280 40% 99%;
+    --foreground: 280 20% 15%;
+    
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 280 20% 20%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 310 90% 70%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 320 60% 85%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 310 90% 70%;
-
-    --radius: 0.8rem;
-
-    /* Custom wellness colors */
-    --pink-soft: 330 80% 90%;
-    --purple-soft: 270 60% 85%;
-    --teal-soft: 180 60% 80%;
-    --rose-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    --wellness-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gentle-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    --popover-foreground: 280 20% 15%;
+    
+    --primary: 270 70% 60%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 190 60% 96%;
+    --secondary-foreground: 190 80% 30%;
+    
+    --muted: 280 20% 96%;
+    --muted-foreground: 280 10% 50%;
+    
+    --accent: 330 80% 65%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 280 20% 92%;
+    --input: 280 20% 92%;
+    --ring: 270 70% 60%;
+    
+    --radius: 1rem;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-[#FCFAFF] text-slate-800 antialiased overflow-x-hidden;
+  /* Multi-Pastel Mesh Background */
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(270, 70%, 96%, 1) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(150, 70%, 95%, 1) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, hsla(20, 80%, 96%, 1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(190, 70%, 96%, 1) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(330, 70%, 97%, 1) 0px, transparent 50%);
+  background-attachment: fixed;
+}
 
-  body {
-    @apply bg-gradient-to-br from-pink-50 via-purple-50 to-teal-50 text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.01em;
 }
 
 @layer utilities {
-  .gradient-rose {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  }
-  
-  .gradient-wellness {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
-  
-  .gradient-gentle {
-    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-  }
-  
-  .gradient-teal {
-    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-  }
-  
-  .card-glow {
-    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.15);
-  }
-  
   .text-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-emerald-400 to-sky-400 font-black;
+    /* Fallback */
+    color: #a78bfa; 
+  }
+
+  @supports (-webkit-background-clip: text) or (background-clip: text) {
+    .text-gradient {
+      color: transparent;
+    }
+  }
+
+  .gradient-wellness {
+    @apply bg-gradient-to-br from-purple-600 to-pink-500 text-white;
+  }
+
+  .gradient-rose {
+    @apply bg-gradient-to-br from-pink-500 to-rose-400 text-white;
+  }
+
+  .gradient-gentle {
+    @apply bg-gradient-to-br from-purple-500/90 to-pink-500/90 text-white;
+  }
+
+  .card-glow {
+    @apply bg-white shadow-[0_0_50px_-12px_rgba(168,85,247,0.15)] border border-purple-50/50;
+  }
+
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_rgba(124,58,237,0.06)];
+  }
+
+  .premium-card {
+    @apply bg-white rounded-2xl border border-purple-50/50 shadow-[0_20px_60px_-15px_rgba(124,58,237,0.08)] hover:shadow-[0_30px_80px_-15px_rgba(124,58,237,0.12)] transition-all duration-500;
+  }
+
+  .bottom-nav-container {
+    @apply fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md glass-panel rounded-2xl p-2 flex justify-between items-center z-[100] border-white/80 shadow-[0_20px_50px_rgba(124,58,237,0.15)];
+  }
+
+  .nav-item {
+    @apply flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-2xl transition-all duration-300 gap-1;
+  }
+
+  .nav-item-active {
+    @apply text-purple-600 scale-110;
+  }
+
+  .nav-item-inactive {
+    @apply text-slate-400 hover:text-purple-400;
   }
 }
 
-/* Smooth animations */
-* {
-  transition: all 0.2s ease;
+/* Sidebar Styles for Desktop */
+.sidebar-container {
+  @apply fixed left-0 top-0 h-screen w-72 bg-white border-r border-purple-50 shadow-[20px_0_60px_-15px_rgba(124,58,237,0.05)] z-40 transition-all duration-500 flex flex-col p-8;
+}
+
+.sidebar-item {
+  @apply flex items-center space-x-4 p-4 rounded-2xl transition-all duration-300 font-bold text-sm mb-2 cursor-pointer;
+}
+
+.sidebar-item-active {
+  @apply bg-gradient-to-r from-purple-100 to-purple-50 text-purple-700 border border-purple-200 shadow-sm font-black;
+}
+
+.sidebar-item-inactive {
+  @apply text-slate-400 hover:bg-purple-50 hover:text-purple-600;
+}
+
+.content-wrapper {
+  @apply transition-all duration-500;
+}
+
+@media (min-width: 1024px) {
+  .content-wrapper {
+    @apply ml-72;
+  }
+  .bottom-nav-container {
+    @apply hidden;
+  }
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Custom Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+}
+
+/* Professional Medical Report Print Styles */
+@media print {
+  @page { margin: 10mm; size: A4; }
+  body { background: white !important; }
+  .no-print, header, nav, button, aside { display: none !important; }
+  #printable-report-container {
+    display: block !important;
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%;
+    visibility: visible !important;
+  }
+  #printable-report-container * { visibility: visible !important; }
+  body > #root > *:not(#printable-report-container) { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }

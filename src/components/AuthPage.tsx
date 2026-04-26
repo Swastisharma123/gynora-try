@@ -70,26 +70,26 @@ const AuthPage = ({ onBack }: AuthPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-teal-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8 border-0 shadow-xl bg-white/90 backdrop-blur-lg">
-        <div className="text-center mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md p-8 border border-purple-50 shadow-[0_30px_90px_rgba(124,58,237,0.1)] bg-white/90 backdrop-blur-xl rounded-3xl relative">
+        <div className="text-center mb-10">
           <button
             onClick={onBack}
-            className="absolute top-6 left-6 p-2 rounded-xl bg-white/50 hover:bg-white/70 transition-colors"
+            className="absolute top-8 left-8 p-2 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 transition-all border border-purple-100/50"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
           
-          <div className="w-20 h-20 gradient-rose rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+          <div className="w-20 h-20 bg-white rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-xl p-2.5 border border-purple-50">
             <img 
-              src="images/favicon.png" 
+              src="/images/logo.png" 
               alt="GYNORA Logo" 
-              className="w-20 h-20 rounded-2xl"
+              className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-3xl font-bold text-gradient mb-2">Welcome to GYNORA</h1>
-          <p className="text-gray-600">
-            {isLogin ? "Sign in to your account" : "Create your wellness account"}
+          <h1 className="text-3xl font-black text-slate-800 mb-2 tracking-tighter">Welcome back</h1>
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+            {isLogin ? "Access your dashboard" : "Join the ecosystem"}
           </p>
         </div>
 

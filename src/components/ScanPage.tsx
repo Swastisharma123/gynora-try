@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, Activity, AlertCircle, Camera } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useScans } from '@/hooks/useScans';
 import FaceScanner from './FaceScanner';
 
@@ -17,7 +18,8 @@ const ScanPage = () => {
     pigmentation_score: 45,
     overall_improvement: 15,
     scan_date: new Date().toISOString(),
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    recommendations: []
   };
 
   const scanHistory = scans.slice(0, 4).map(scan => ({
@@ -61,7 +63,7 @@ const ScanPage = () => {
     return (
       <div className="space-y-6 pb-20">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gradient mb-2">Face Analysis</h2>
+          <h2 className="text-3xl font-bold text-purple-600 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-purple-500 mb-2" style={{ WebkitTextFillColor: 'transparent' }}>Face Analysis</h2>
           <p className="text-gray-600">AI-powered PCOS symptom detection</p>
         </div>
         
@@ -84,7 +86,7 @@ const ScanPage = () => {
     <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gradient mb-2">Scan Results</h2>
+        <h2 className="text-3xl font-bold text-purple-600 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-purple-500 mb-2" style={{ WebkitTextFillColor: 'transparent' }}>Scan Results</h2>
         <p className="text-gray-600">AI-powered facial analysis for PCOS symptoms</p>
       </div>
 
@@ -92,7 +94,7 @@ const ScanPage = () => {
       <Card className="p-6 card-glow border-0 shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-lg">Latest Analysis</h3>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-slate-500 font-bold">
             {new Date(latestScan.created_at).toLocaleDateString()}
           </span>
         </div>
@@ -135,7 +137,7 @@ const ScanPage = () => {
             </p>
           </div>
 
-          <div className="bg-gradient-to-r from-teal-50 to-blue-50 p-4 rounded-xl">
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 p-4 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <span className="font-medium">Facial Hair</span>
               <div className="flex items-center space-x-2">
@@ -177,24 +179,25 @@ const ScanPage = () => {
         </div>
       </Card>
 
-      {/* Scan History Timeline */}
+      {/* Scan History Chart Summary */}
       {scanHistory.length > 0 && (
         <Card className="p-6 border-0 shadow-lg">
-          <h3 className="font-semibold mb-4 text-lg">Progress Timeline</h3>
-          <div className="space-y-3">
-            {scanHistory.map((scan, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl hover:shadow-md transition-all duration-200">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${index === 0 ? 'bg-purple-500' : 'bg-purple-300'}`}></div>
-                  <span className="font-medium text-sm">{scan.date}</span>
-                </div>
-                <div className="flex space-x-4 text-xs">
-                  <span className={`font-medium ${getScoreColor(scan.acne)}`}>A: {Math.round(scan.acne)}</span>
-                  <span className={`font-medium ${getScoreColor(scan.facialHair)}`}>H: {Math.round(scan.facialHair)}</span>
-                  <span className={`font-medium ${getScoreColor(scan.pigmentation)}`}>P: {Math.round(scan.pigmentation)}</span>
-                </div>
-              </div>
-            ))}
+          <h3 className="font-semibold mb-4 text-lg">Overall Progress Summary</h3>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={[...scanHistory].reverse()}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="date" tick={{fontSize: 12}} tickLine={false} axisLine={false} />
+                <YAxis tick={{fontSize: 12}} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                <Line type="monotone" dataKey="acne" name="Acne" stroke="#ec4899" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} />
+                <Line type="monotone" dataKey="facialHair" name="Facial Hair" stroke="#a855f7" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} />
+                <Line type="monotone" dataKey="pigmentation" name="Pigmentation" stroke="#8b5cf6" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </Card>
       )}
@@ -206,18 +209,17 @@ const ScanPage = () => {
           <h3 className="font-semibold text-lg">AI Recommendations</h3>
         </div>
         <div className="space-y-3">
-          <div className="p-4 bg-blue-50 rounded-xl border-l-4 border-blue-400">
-            <p className="text-sm font-medium text-blue-800 mb-1">💧 Skincare</p>
-            <p className="text-xs text-blue-600">Consider adding niacinamide to your routine for better oil control</p>
-          </div>
-          <div className="p-4 bg-green-50 rounded-xl border-l-4 border-green-400">
-            <p className="text-sm font-medium text-green-800 mb-1">🥗 Nutrition</p>
-            <p className="text-xs text-green-600">Increase omega-3 rich foods to support hormonal balance</p>
-          </div>
-          <div className="p-4 bg-purple-50 rounded-xl border-l-4 border-purple-400">
-            <p className="text-sm font-medium text-purple-800 mb-1">🏃‍♀️ Lifestyle</p>
-            <p className="text-xs text-purple-600">Regular cardio exercise can help reduce PCOS symptoms</p>
-          </div>
+          {latestScan.recommendations && latestScan.recommendations.length > 0 ? (
+            latestScan.recommendations.map((rec, idx) => (
+              <div key={idx} className="p-4 bg-purple-50 rounded-xl border-l-4 border-purple-400">
+                <p className="text-xs text-purple-700">{rec}</p>
+              </div>
+            ))
+          ) : (
+            <div className="p-4 bg-gray-50 rounded-xl text-sm text-gray-500">
+              Complete a face scan to receive personalized recommendations.
+            </div>
+          )}
         </div>
       </Card>
 
