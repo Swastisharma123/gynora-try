@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useScans } from '@/hooks/useScans';
 import { History, Sparkles, FlaskConical, AlertCircle, TrendingUp, Camera } from 'lucide-react';
 import { StripScanner } from '@/components/StripScanner';
+import ReactMarkdown from 'react-markdown';
 
 const SweatAnalysis = () => {
   const [glucose, setGlucose] = useState('');
@@ -70,7 +71,16 @@ Clinical Guidelines:
 3. pH: Purple is Normal. Bright Pink/Strong Green is High Risk.
 4. Salt: Clear is Normal. Dense White Cloud is High Risk.
 
-Provide a professional medical-coach analysis. End with "This is not a medical diagnosis."`;
+CRITICAL INSTRUCTION:
+DO NOT use markdown tables. DO NOT use pipes (|) or dashes (---). 
+Format your response exactly like this:
+
+**Cortisol:** [Your analysis here]
+**Glucose:** [Your analysis here]
+**pH:** [Your analysis here]
+**Salt:** [Your analysis here]
+
+End with "This is not a medical diagnosis."`;
       
       const aiResponseText = await callAI(prompt);
       
@@ -213,7 +223,9 @@ Provide a professional medical-coach analysis. End with "This is not a medical d
               <h4 className="text-xs font-bold text-purple-800 mb-2 flex items-center">
                 <Sparkles className="w-4 h-4 mr-2" /> AI Wellness Insight
               </h4>
-              <p className="text-xs text-purple-700 leading-relaxed whitespace-pre-wrap">{aiResult}</p>
+              <div className="text-xs text-purple-700 leading-relaxed prose prose-sm prose-purple max-w-none">
+                <ReactMarkdown>{aiResult}</ReactMarkdown>
+              </div>
             </div>
 
             {/* History Section for Sweat Analysis */}

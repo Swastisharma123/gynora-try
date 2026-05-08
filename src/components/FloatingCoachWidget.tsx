@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { MessageCircle, X, Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { callAI } from "@/lib/ai";
 
 interface Message {
@@ -22,7 +23,15 @@ export const FloatingCoachWidget: React.FC = () => {
     setInput("");
     setIsLoading(true);
 
-    const prompt = `You are Gynora's empathetic AI Wellness Coach, specifically designed to support women managing PCOS/PCOD. Your tone is warm, compassionate, and highly sensitive to the emotional and physical challenges women face. You specialize in skin care routines, hormonal balance, nutrition, and mental health. Always prioritize being supportive and kind while providing evidence-based wellness guidance.\n\nUser: ${textToSend}`;
+    const prompt = `You are Gynora's empathetic AI Wellness Coach, specifically designed to support women managing PCOS/PCOD. Your tone is extremely warm, lively, highly human-like, and compassionate. You specialize in skin care, hormonal balance, nutrition, and mental health. 
+
+CRITICAL FORMATTING RULES:
+1. Speak like a supportive best friend or caring mentor—not a clinical robot. It should never be dull.
+2. Use emojis naturally and generously to make the text feel expressive and friendly.
+3. DO NOT use numbered lists. If you need to list things, use short bullet points or natural conversational paragraphs instead.
+4. Keep the formatting clean and readable using markdown.
+
+User: ${textToSend}`;
 
     const aiResponseText = await callAI(prompt);
     const aiMessage: Message = { sender: "ai", text: aiResponseText };
@@ -85,15 +94,14 @@ export const FloatingCoachWidget: React.FC = () => {
                 className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`px-4 py-3 rounded-2xl text-[13px] font-bold max-w-[85%] leading-relaxed shadow-sm ${
+                  className={`px-4 py-3 rounded-2xl text-[13px] font-bold max-w-[85%] leading-relaxed shadow-sm prose prose-sm max-w-none ${
                     msg.sender === "user"
-                      ? "bg-gradient-to-br from-purple-600 to-pink-500 text-white rounded-br-none"
-                      : "bg-white text-slate-600 rounded-bl-none border border-purple-50"
+                      ? "bg-gradient-to-br from-purple-600 to-pink-500 text-white rounded-br-none prose-invert"
+                      : "bg-white text-slate-600 rounded-bl-none border border-purple-50 prose-slate"
                   }`}
-                  dangerouslySetInnerHTML={{
-                    __html: msg.text.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br/>")
-                  }}
-                />
+                >
+                  <ReactMarkdown>{String(msg.text || "")}</ReactMarkdown>
+                </div>
               </div>
             ))}
             {isLoading && (
