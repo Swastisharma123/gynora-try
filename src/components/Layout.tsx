@@ -10,10 +10,12 @@ import {
   Droplets,
   BookOpen,
   Package,
+  Package,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { FloatingCoachWidget } from '@/components/FloatingCoachWidget';
 import { FloatingCoachWidget } from '@/components/FloatingCoachWidget';
 
 interface LayoutProps {
@@ -35,6 +37,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
     { id: 'coach', label: 'Coach', icon: MessageCircle },
     { id: 'reports', label: 'Reports', icon: FileText },
     { id: 'buy-kit', label: 'Buy Kit', icon: Package },
+    { id: 'buy-kit', label: 'Buy Kit', icon: Package },
   ];
 
   const handleSignOut = async () => {
@@ -47,7 +50,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
       <aside className="sidebar-container hidden lg:flex w-64 border-r border-purple-100/50 bg-white/80 backdrop-blur-xl">
         <div className="flex items-center space-x-3 mb-10">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg border border-purple-50 p-1.5 overflow-hidden">
-             <img src="/images/logo.png" alt="GYNORA" className="w-full h-full object-contain" />
+            <img src="/images/logo.png" alt="GYNORA" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="text-xl font-black text-slate-800 tracking-tighter leading-none">GYNORA</h1>
@@ -75,22 +78,22 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         </nav>
 
         <div className="mt-auto pt-6 border-t border-purple-50">
-           <div className="flex items-center space-x-3 mb-5 px-2">
-              <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
-                 <User className="w-4 h-4 text-purple-600" />
-              </div>
-              <div>
-                 <p className="text-[11px] font-black text-slate-800 leading-none">{profile?.full_name?.split(' ')[0] || 'User'}</p>
-                 <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1">Health ID: Active</p>
-              </div>
-           </div>
-           <button 
-             onClick={handleSignOut}
-             className="w-full flex items-center space-x-3 p-3 rounded-xl text-slate-400 hover:text-pink-500 hover:bg-pink-50 transition-all font-bold text-xs"
-           >
-             <LogOut className="w-4 h-4" />
-             <span>Sign Out</span>
-           </button>
+          <div className="flex items-center space-x-3 mb-5 px-2">
+            <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+              <User className="w-4 h-4 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-[11px] font-black text-slate-800 leading-none">{profile?.full_name?.split(' ')[0] || 'User'}</p>
+              <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1">Health ID: Active</p>
+            </div>
+          </div>
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center space-x-3 p-3 rounded-xl text-slate-400 hover:text-pink-500 hover:bg-pink-50 transition-all font-bold text-xs"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
 
@@ -106,18 +109,18 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
           </div>
 
           <div className="hidden lg:block">
-             <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Portal / <span className="text-purple-600 font-black">{navItems.find(i => i.id === currentPage)?.label}</span></h2>
+            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Portal / <span className="text-purple-600 font-black">{navItems.find(i => i.id === currentPage)?.label}</span></h2>
           </div>
 
           <div className="flex items-center space-x-3">
             <div className="hidden sm:flex flex-col items-end mr-3">
-               <span className="text-[11px] font-black text-slate-800 tracking-tight leading-none">{profile?.full_name || 'Wellness User'}</span>
-               <button 
-                 onClick={() => onPageChange('buy-kit')}
-                 className="text-[8px] text-pink-500 font-black uppercase tracking-[0.1em] mt-1.5 hover:underline transition-all"
-               >
-                 Buy the kit
-               </button>
+              <span className="text-[11px] font-black text-slate-800 tracking-tight leading-none">{profile?.full_name || 'Wellness User'}</span>
+              <button
+                onClick={() => onPageChange('buy-kit')}
+                className="text-[8px] text-pink-500 font-black uppercase tracking-[0.1em] mt-1.5 hover:underline transition-all"
+              >
+                Buy the kit
+              </button>
             </div>
             <button className="w-9 h-9 rounded-xl bg-white border border-purple-100 flex items-center justify-center text-purple-600 hover:shadow-md transition-all">
               <Bell className="w-4 h-4" />
@@ -154,7 +157,9 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         </div>
         <FloatingCoachWidget />
       </div>
+      <FloatingCoachWidget />
     </div>
+    </div >
   );
 };
 
