@@ -10,12 +10,10 @@ import {
   Droplets,
   BookOpen,
   Package,
-  Package,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { FloatingCoachWidget } from '@/components/FloatingCoachWidget';
 import { FloatingCoachWidget } from '@/components/FloatingCoachWidget';
 
 interface LayoutProps {
@@ -36,7 +34,6 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
     { id: 'education', label: 'Education', icon: BookOpen },         // ✅ Added
     { id: 'coach', label: 'Coach', icon: MessageCircle },
     { id: 'reports', label: 'Reports', icon: FileText },
-    { id: 'buy-kit', label: 'Buy Kit', icon: Package },
     { id: 'buy-kit', label: 'Buy Kit', icon: Package },
   ];
 
@@ -157,9 +154,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         </div>
         <FloatingCoachWidget />
       </div>
-      <FloatingCoachWidget />
     </div>
-    </div >
   );
 };
 

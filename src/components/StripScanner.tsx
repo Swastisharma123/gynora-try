@@ -18,7 +18,9 @@ interface StripScannerProps {
 export const StripScanner: React.FC<StripScannerProps> = ({ onScanComplete, onClose }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisStatus, setAnalysisStatus] = useState("");
   const [stream, setStream] = useState<MediaStream | null>(null);
   const { toast } = useToast();
 
@@ -31,6 +33,7 @@ export const StripScanner: React.FC<StripScannerProps> = ({ onScanComplete, onCl
         videoRef.current.srcObject = newStream;
       }
       setStream(newStream);
+      setCapturedImage(null);
     } catch (error) {
       toast({
         title: "Camera Error",
@@ -55,7 +58,6 @@ export const StripScanner: React.FC<StripScannerProps> = ({ onScanComplete, onCl
   const captureAndAnalyze = async () => {
     if (!videoRef.current || !canvasRef.current) return;
 
-    setIsAnalyzing(true);
     const canvas = canvasRef.current;
     const video = videoRef.current;
     canvas.width = video.videoWidth;
@@ -65,34 +67,65 @@ export const StripScanner: React.FC<StripScannerProps> = ({ onScanComplete, onCl
     if (ctx) {
       ctx.drawImage(video, 0, 0);
       const imageData = canvas.toDataURL('image/jpeg');
+      setCapturedImage(imageData);
+      setIsAnalyzing(true);
+      setAnalysisStatus("Locating strip in image...");
+      
+      // Stop camera immediately so user can move away
+      stopCamera();
       
       try {
         const prompt = `Analyze this Gynora 4-in-1 test strip image. 
-        Detect the colors for the 4 zones: Cortisol, Glucose, pH, and Salt.
-        Return ONLY a raw JSON object (no backticks) with these keys and the color names as values.
+        Step 1: Locate the test strip in the image.
+        Step 2: Detect the specific colors for the 4 chemical zones: Cortisol, Glucose, pH, and Salt.
+        Step 3: Return ONLY a raw JSON object with these exact keys and the detected color names as values.
+        Keys: "cortisol", "glucose", "ph", "salt".
         Example: {"cortisol": "Dark Brown", "glucose": "No Color", "ph": "Purple", "salt": "Dense White"}`;
         
+        console.log("Calling AI for strip analysis...");
+        setAnalysisStatus("Detecting color zones...");
         const aiResponse = await callAI(prompt, imageData);
+        console.log("AI Response received:", aiResponse);
         
-        // Find JSON in response
-        const jsonMatch = aiResponse.match(/\{.*\}/s);
+        setAnalysisStatus("Processing biomarker data...");
+        // Find JSON in response (more robustly)
+        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          const results = JSON.parse(jsonMatch[0]);
-          onScanComplete(results);
-          toast({
-            title: "Scan Successful",
-            description: "Colors detected and filled into the form.",
-          });
-          onClose();
+          try {
+            const results = JSON.parse(jsonMatch[0]);
+            console.log("Parsed results:", results);
+            
+            // Normalize keys if needed
+            const normalizedResults = {
+              glucose: results.glucose || results.Glucose || "",
+              ph: results.ph || results.pH || results.PH || "",
+              cortisol: results.cortisol || results.Cortisol || "",
+              salt: results.salt || results.Salt || ""
+            };
+
+            onScanComplete(normalizedResults);
+            toast({
+              title: "Scan Successful",
+              description: "Colors detected and filled into the form.",
+            });
+            onClose();
+          } catch (parseError) {
+            console.error("JSON Parse Error:", parseError);
+            throw new Error("Failed to parse AI response. Please try again.");
+          }
         } else {
+          console.warn("No JSON found in AI response");
           throw new Error("Could not detect strip zones. Please try again with better lighting.");
         }
       } catch (error: any) {
+        console.error("Analysis Error:", error);
         toast({
           title: "Analysis Failed",
           description: error.message || "Please ensure the strip is clearly visible and try again.",
           variant: "destructive"
         });
+        // Restart camera if failed so they can try again
+        startCamera();
       } finally {
         setIsAnalyzing(false);
       }
@@ -113,27 +146,37 @@ export const StripScanner: React.FC<StripScannerProps> = ({ onScanComplete, onCl
         </div>
 
         <Card className="relative aspect-[4/3] w-full overflow-hidden bg-slate-900 border-2 border-purple-500/30 rounded-3xl shadow-2xl">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full h-full object-cover"
-          />
+          {capturedImage ? (
+            <img 
+              src={capturedImage} 
+              alt="Captured Strip" 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          )}
           <canvas ref={canvasRef} className="hidden" />
           
-          {/* Scanning Overlay */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute inset-10 border-2 border-dashed border-white/30 rounded-2xl"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-1/4 border-2 border-purple-500 rounded-lg shadow-[0_0_30px_rgba(168,85,247,0.5)]">
-               <div className="absolute top-0 left-0 w-full h-0.5 bg-purple-400 shadow-[0_0_15px_#a855f7] animate-[scan_2s_infinite]"></div>
+          {/* Scanning Overlay (only show when not analyzing) */}
+          {!isAnalyzing && !capturedImage && (
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-10 border-2 border-dashed border-white/30 rounded-2xl"></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-1/4 border-2 border-purple-500 rounded-lg shadow-[0_0_30px_rgba(168,85,247,0.5)]">
+                 <div className="absolute top-0 left-0 w-full h-0.5 bg-purple-400 shadow-[0_0_15px_#a855f7] animate-[scan_2s_infinite]"></div>
+              </div>
             </div>
-          </div>
+          )}
 
           {isAnalyzing && (
-            <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-md flex flex-center flex-col items-center justify-center text-white p-6 text-center">
+            <div className="absolute inset-0 bg-purple-900/60 backdrop-blur-md flex flex-center flex-col items-center justify-center text-white p-6 text-center">
               <RefreshCw className="w-12 h-12 animate-spin mb-4 text-purple-300" />
               <p className="font-black text-sm uppercase tracking-widest">Analyzing Strip...</p>
-              <p className="text-[10px] mt-2 opacity-70">Detecting chemical biomarkers</p>
+              <p className="text-[10px] mt-2 font-bold text-purple-200 animate-pulse">{analysisStatus}</p>
             </div>
           )}
         </Card>

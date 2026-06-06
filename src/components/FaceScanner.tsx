@@ -50,6 +50,7 @@ const FaceScanner = () => {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
         setHasPermission(true);
+        setCapturedImage(null);
       }
     } catch (error) {
       console.error('Camera access denied:', error);
@@ -111,6 +112,7 @@ const FaceScanner = () => {
     }
 
     setCapturedImage(imageData);
+    stopCamera(); // Freeze frame and stop camera stream
     setIsScanning(false);
     setIsAnalyzing(true);
 
@@ -130,15 +132,22 @@ Clinical Guidelines for Accuracy:
 
 Be highly objective. If symptoms are mild, keep scores in the 5-20 range. Only use 70+ for severe clinical presentations.`;
       
+      console.log("Calling AI for face analysis...");
       const aiResponse = await callAI(prompt, imageData);
+      console.log("AI Response received:", aiResponse);
       
-      // Parse the JSON string
+      // Parse the JSON string (robustly)
       let rawResults;
       try {
-        const cleanedResponse = aiResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-        rawResults = JSON.parse(cleanedResponse);
+        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          rawResults = JSON.parse(jsonMatch[0]);
+          console.log("Parsed results:", rawResults);
+        } else {
+          throw new Error("No JSON found in response");
+        }
       } catch (e) {
-        console.error("Failed to parse Gemini response as JSON:", aiResponse);
+        console.error("Failed to parse AI response as JSON:", aiResponse);
         // Fallback realistic random values if parsing fails
         const randomScore = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
         rawResults = {
@@ -249,13 +258,21 @@ Be highly objective. If symptoms are mild, keep scores in the 5-20 range. Only u
                 </div>
               )}
 
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover"
-              />
+              {capturedImage ? (
+                <img 
+                  src={capturedImage} 
+                  alt="Captured Face" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
+                />
+              )}
               
               {countdown > 0 && (
                 <div className="absolute inset-0 flex items-center justify-center bg-purple-900/40 backdrop-blur-md z-40">
@@ -264,14 +281,14 @@ Be highly objective. If symptoms are mild, keep scores in the 5-20 range. Only u
               )}
               
               {isAnalyzing && (
-                <div className="absolute inset-0 bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center z-50 p-12 text-center">
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-xl flex flex-col items-center justify-center z-50 p-12 text-center">
                   <div className="relative mb-8">
                     <div className="w-24 h-24 border-4 border-purple-50 rounded-full"></div>
                     <div className="absolute inset-0 w-24 h-24 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
                     <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-purple-600 animate-pulse" />
                   </div>
                   <h3 className="text-xl font-black text-slate-800 tracking-tight mb-2">Analyzing Biomarkers</h3>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest max-w-xs">Our AI is mapping unique skin patterns to detect hormonal indicators.</p>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest max-w-xs">Processing captured frame for hormonal indicators...</p>
                   <div className="mt-8 w-64 h-1.5 bg-purple-50 rounded-full overflow-hidden">
                      <div className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 animate-[loading_2s_ease-in-out_infinite]"></div>
                   </div>

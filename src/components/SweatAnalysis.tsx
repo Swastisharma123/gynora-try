@@ -17,20 +17,24 @@ const SweatAnalysis = () => {
   const [aiResult, setAiResult] = useState('');
   const [pcosScore, setPcosScore] = useState<number | null>(null);
   const [showScanner, setShowScanner] = useState(false);
-  const [showScanner, setShowScanner] = useState(false);
   const { toast } = useToast();
   const { addScan, scans } = useScans();
 
+  const handleAnalyze = async (
+    manualGlucose?: string,
+    manualPh?: string,
+    manualCortisol?: string,
+    manualSalt?: string
+  ) => {
+    const activeGlucose = manualGlucose || glucose;
+    const activePh = manualPh || ph;
+    const activeCortisol = manualCortisol || cortisol;
+    const activeSalt = manualSalt || salt;
 
-  const { addScan, scans } = useScans();
-
-
-
-  const handleAnalyze = async () => {
-    if (!glucose || !ph || !cortisol || !salt) {
+    if (!activeGlucose || !activePh || !activeCortisol || !activeSalt) {
       toast({
         title: "Missing Fields",
-        description: "Please fill in all test results.",
+        description: "Please fill in all test results or scan your kit.",
         variant: "destructive",
       });
       return;
@@ -43,7 +47,6 @@ const SweatAnalysis = () => {
       // Clinical Score Calculation based on User Manual
       const calculateClinicalScore = () => {
         let totalScore = 0;
-        let count = 0;
 
         const checkRisk = (val: string, low: string[], med: string[], high: string[]) => {
           const v = val.toLowerCase();
@@ -53,10 +56,10 @@ const SweatAnalysis = () => {
           return 30; // Default baseline
         };
 
-        totalScore += checkRisk(cortisol, ["dark brown"], ["light brown"], ["faded", "no color", "none"]);
-        totalScore += checkRisk(glucose, ["no color", "faint", "clear"], ["light blue", "pale brown"], ["deep blue", "dark brown"]);
-        totalScore += checkRisk(ph, ["purple"], ["pink", "green"], ["bright pink", "strong", "blue"]);
-        totalScore += checkRisk(salt, ["clear", "faint"], ["slight white", "cloud"], ["dense", "white cloud"]);
+        totalScore += checkRisk(activeCortisol, ["dark brown"], ["light brown"], ["faded", "no color", "none"]);
+        totalScore += checkRisk(activeGlucose, ["no color", "faint", "clear"], ["light blue", "pale brown"], ["deep blue", "dark brown"]);
+        totalScore += checkRisk(activePh, ["purple"], ["pink", "green"], ["bright pink", "strong", "blue"]);
+        totalScore += checkRisk(activeSalt, ["clear", "faint"], ["slight white", "cloud"], ["dense", "white cloud"]);
 
         return Math.round(totalScore / 4);
       };
@@ -64,10 +67,10 @@ const SweatAnalysis = () => {
       const clinicalScore = calculateClinicalScore();
 
       const prompt = `You are Gynora's Clinical AI. Analyze these sweat/saliva results based on the Gynora 4-in-1 manual:
-- Cortisol: ${cortisol}
-- Glucose: ${glucose}
-- pH: ${ph}
-- Salt/Electrolytes: ${salt}
+- Cortisol: ${activeCortisol}
+- Glucose: ${activeGlucose}
+- pH: ${activePh}
+- Salt/Electrolytes: ${activeSalt}
 
 Clinical Guidelines:
 1. Cortisol: Dark Brown is Normal. No Color is High Risk.
@@ -110,27 +113,17 @@ End with "This is not a medical diagnosis."`;
         title: "Error",
         description: "Failed to generate AI analysis.",
         variant: "destructive",
-        description: "Your results have been analyzed based on clinical guidelines.",
-      });
-    } catch (e) {
-      toast({
-        title: "Error",
-        description: "Failed to generate AI analysis.",
-        variant: "destructive",
       });
     }
     setIsLoading(false);
-  }
-  setIsLoading(false);
-};
+  };
 
-return (
+  return (
   <div className="space-y-6 pb-24">
     <div className="text-center">
       <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto mb-3 flex items-center justify-center">
         <FlaskConical className="w-8 h-8 text-white" />
       </div>
-      <h2 className="text-2xl font-bold text-purple-600 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-purple-500" style={{ WebkitTextFillColor: 'transparent' }}>Sweat Analysis</h2>
       <h2 className="text-2xl font-bold text-purple-600 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-purple-500" style={{ WebkitTextFillColor: 'transparent' }}>Sweat Analysis</h2>
       <p className="text-gray-600">Log your DIY strip result to get PCOS insights</p>
       <a
@@ -143,53 +136,12 @@ return (
       </a>
     </div>
 
-    <div className="flex flex-col items-center gap-4">
-      <Button
-        onClick={() => setShowScanner(true)}
-        className="h-14 w-full max-w-sm gradient-wellness text-white shadow-lg border-0 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3"
-      >
-        <Camera className="w-5 h-5" />
-        Scan My Kit (AI)
-      </Button>
-      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Or enter manually below</p>
-    </div>
-
-    {showScanner && (
-      <StripScanner
-        onClose={() => setShowScanner(false)}
-        onScanComplete={(results) => {
-          setGlucose(results.glucose || "");
-          setPh(results.ph || "");
-          setCortisol(results.cortisol || "");
-          setSalt(results.salt || "");
-        }}
-      />
-    )}
-
-    <div className="flex flex-col items-center gap-4">
-      <Button
-        onClick={() => setShowScanner(true)}
-        className="h-14 w-full max-w-sm gradient-wellness text-white shadow-lg border-0 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3"
-      >
-        <Camera className="w-5 h-5" />
-        Scan My Kit (AI)
-      </Button>
-      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Or enter manually below</p>
-    </div>
-
-    {showScanner && (
-      <StripScanner
-        onClose={() => setShowScanner(false)}
-        onScanComplete={(results) => {
-          setGlucose(results.glucose || "");
-          setPh(results.ph || "");
-          setCortisol(results.cortisol || "");
-          setSalt(results.salt || "");
-        }}
-      />
-    )}
-
     <Card className="p-6 space-y-4">
+      <div className="flex items-center space-x-2 mb-2">
+        <Sparkles className="w-4 h-4 text-purple-500" />
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Enter Kit Results Manually</p>
+      </div>
+
       <div>
         <label className="block font-medium mb-1">Glucose Zone Result</label>
         <Input
@@ -227,7 +179,7 @@ return (
       </div>
 
       <Button
-        onClick={handleAnalyze}
+        onClick={() => handleAnalyze()}
         className="gradient-rose text-white w-full mt-2"
         disabled={isLoading}
       >
